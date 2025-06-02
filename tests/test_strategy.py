@@ -1,8 +1,8 @@
 import cira
 from . import util
 import os
-import numpy as np
-import pandas as pd 
+# import numpy as np # Unused
+import pandas as pd
 
 
 def test_iterate():
@@ -67,7 +67,7 @@ def test_backtest_multi_asset_uniform_prices():
     feature_data = util.stock_data
     strat = cira.strategy.DollarCostAveraging(amount=1)
 
-    prices = pd.DataFrame() 
+    prices = pd.DataFrame()
     prices["ast_1"] = [10, 10, 5, 20, 10]
     prices["ast_2"] = [10, 10, 5, 20, 10]
     prices["ast_3"] = [10, 10, 5, 20, 10]
@@ -76,7 +76,7 @@ def test_backtest_multi_asset_uniform_prices():
     resutlt = cira.strategy.back_test(strat, feature_data, prices, 40, use_fees=False)
 
     res = resutlt[strat.name].values.astype(int).tolist()
-    assert res == [40, 40, 20, 80, 40] 
+    assert res == [40, 40, 20, 80, 40]
 
 
 def test_backtest_multi_asset():
@@ -84,15 +84,15 @@ def test_backtest_multi_asset():
     strat = cira.strategy.DollarCostAveraging(amount=1)
 
     prices = pd.DataFrame()
-    prices["ast_1"] = [10, 10, 1,  0, 0]
-    prices["ast_2"] = [10, 11, 5,  0, 0]
-    prices["ast_3"] = [10, 10, 1,  0, 0]
+    prices["ast_1"] = [10, 10, 1, 0, 0]
+    prices["ast_2"] = [10, 11, 5, 0, 0]
+    prices["ast_3"] = [10, 10, 1, 0, 0]
     prices["ast_4"] = [10, 14, 7, 99, 0]
 
     resutlt = cira.strategy.back_test(strat, feature_data, prices, 40, use_fees=False)
 
     res = resutlt[strat.name].values.astype(int).tolist()
-    assert res == [40, 45, 14, 99, 0] 
+    assert res == [40, 45, 14, 99, 0]
 
 
 def test_backtest_not_enugh_cash():

@@ -7,8 +7,8 @@ import logging
 
 # logging
 IS_LOGGING = False
-LOG_FILE = "./cira-log.csv"
-LOGGING_LEVEL = logging.WARNING
+LOG_FILE = "./cira-log.csv"  # No trailing whitespace
+LOGGING_LEVEL = logging.WARNING  # No trailing whitespace
 
 # debugging
 DEBUG = False

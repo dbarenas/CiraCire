@@ -1,14 +1,10 @@
-import pandas as pd
-
-
 # Alpaca
-import alpaca
 from alpaca.trading.requests import GetAssetsRequest
-from alpaca.trading.enums import AssetClass, OrderType, AssetStatus
-from alpaca.data.models import Bar
-from alpaca.trading.enums import OrderSide, TimeInForce
-from alpaca.data.timeframe import TimeFrame
-from alpaca.trading.requests import LimitOrderRequest, StopLimitOrderRequest
+from alpaca.trading.enums import AssetClass, AssetStatus  # OrderType removed
+# Bar removed
+# OrderSide, TimeInForce removed
+# TimeFrame removed
+# LimitOrderRequest, StopLimitOrderRequest removed
 from alpaca.trading.client import TradingClient
 
 
@@ -16,7 +12,7 @@ from alpaca.trading.client import TradingClient
 from alpaca.data import StockHistoricalDataClient
 from alpaca.data.requests import StockLatestQuoteRequest
 from alpaca.data.requests import StockBarsRequest
-from alpaca.trading.requests import MarketOrderRequest
+# MarketOrderRequest removed
 from alpaca.data.live import StockDataStream
 
 
@@ -24,8 +20,8 @@ from alpaca.data.live import StockDataStream
 from .asset import Asset
 from . import auth
 from . import config
-from . import util
-from . import log
+# util removed
+# log removed
 
 
 class Stock(Asset):
