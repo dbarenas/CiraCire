@@ -1,24 +1,18 @@
-from typing import List
 from datetime import datetime
 import logging
-import warnings
+# warnings removed
 
 # Alpaca
-import alpaca
+# alpaca import removed
 from alpaca.trading.requests import GetAssetsRequest
 from alpaca.trading.enums import AssetClass, OrderType, AssetStatus
-from alpaca.data.models import Bar
+# Bar removed
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.data.timeframe import TimeFrame
-from alpaca.trading.requests import LimitOrderRequest, StopLimitOrderRequest
+from alpaca.trading.requests import LimitOrderRequest, StopLimitOrderRequest, MarketOrderRequest
 from alpaca.trading.client import TradingClient
 
-# stock
-from alpaca.data import StockHistoricalDataClient
-from alpaca.data.requests import StockLatestQuoteRequest
-from alpaca.data.requests import StockBarsRequest
-from alpaca.trading.requests import MarketOrderRequest
-from alpaca.data.live import StockDataStream
+# stock imports removed as they were unused
 
 # crypto
 from alpaca.data import CryptoHistoricalDataClient
@@ -26,11 +20,11 @@ from alpaca.data.live.crypto import CryptoDataStream
 from alpaca.data.requests import CryptoLatestQuoteRequest
 from alpaca.data.requests import CryptoBarsRequest
 
-import pandas as pd
+# pandas removed
 
 from . import auth
 from . import config
-from . import util
+# util removed
 from . import log
 
 from .asset import Asset

@@ -34,20 +34,27 @@ pip install cira
 Since the Alpaca trade API need a API key, you need to generate your own key at [alpaca markets website](https://app.alpaca.markets/signup). If you want to play around with it you can try paper trading (recommended for beginners). I recommend keep it in a **JSON file** which cira needs the **path** to.
 You can also set the variables directly or use an environment variable, see the **[wiki](https://github.com/AxelGard/cira/wiki/Storing-the-Alpaca-API-key)** for diffrent the ways. However, it is **recommended** that you store it in a file just make sure not to upload that file on any public repositories. 
 
-You can set the Alpaca keys directly 
+You can set the Alpaca keys using the provided functions:
 
 ```python
 import cira
 
-cira.auth.APCA_API_KEY_ID = "my key" 
-cira.auth.APCA_API_SECRET_KEY = "my secret key"
+# Set keys directly
+cira.auth.set_api_keys("YOUR_API_KEY_ID", "YOUR_SECRET_KEY")
 
-stock = cira.Stock("TSLA")
-stock.buy(1) # buy 1 TSLA stock on alpaca 
-stock.sell(1) # sell 1 TSLA stock on alpaca 
+# Or, if you prefer to use a JSON key file:
+# cira.auth.set_key_file_path("/path/to/your/key.json")
+
+# Ensure keys are set before using functionalities that require authentication
+if cira.auth.check_keys():
+    stock = cira.Stock("TSLA")
+    stock.buy(1) # buy 1 TSLA stock on alpaca 
+    stock.sell(1) # sell 1 TSLA stock on alpaca
+else:
+    print("API keys are not configured correctly.")
 ```
 
-For interactons with alpaca you can:  
+For interactons with alpaca you can:
 ```python
 portfolio = cira.Portfolio() # methods for your portfolio
 exchange = cira.Exchange() # methods for exchange

@@ -7,12 +7,9 @@ import warnings
 import alpaca
 import alpaca.trading
 import alpaca.trading.models
-from alpaca.trading.requests import GetAssetsRequest
-from alpaca.trading.enums import AssetClass, OrderType, AssetStatus
-from alpaca.data.models import Bar
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.data.timeframe import TimeFrame
-from alpaca.trading.requests import LimitOrderRequest, StopLimitOrderRequest
+from alpaca.trading.requests import LimitOrderRequest
 from alpaca.trading.client import TradingClient
 
 # stock
@@ -23,16 +20,11 @@ from alpaca.trading.requests import MarketOrderRequest
 from alpaca.data.live import StockDataStream
 
 # crypto
-from alpaca.data import CryptoHistoricalDataClient
-from alpaca.data.live.crypto import CryptoDataStream
-from alpaca.data.requests import CryptoLatestQuoteRequest
-from alpaca.data.requests import CryptoBarsRequest
+# Crypto imports removed as they were unused
 
 import pandas as pd
 
-from . import auth
 from . import config
-from . import util
 from . import log
 
 

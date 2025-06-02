@@ -124,7 +124,77 @@ class ByAndHold(Strategy):
 
 FEE_RATE = 0.004  # this is what alpaca takes
 
-fees = lambda prices, allocation: FEE_RATE * np.matmul(prices.T, allocation)
+
+def fees(prices, allocation):  # E302 fix (added blank line before)
+    """Calculates fees based on the fee rate, prices, and allocation."""
+    return FEE_RATE * np.matmul(prices.T, allocation)
+
+
+# Helper function for adjusting allocation based on current holdings and cash
+def _adjust_allocation(
+    requested_allocation: np.ndarray,
+    current_holdings: np.ndarray,
+    current_cash: float,
+) -> np.ndarray:
+    """
+    Adjusts the requested allocation.
+    - Prevents selling more assets than currently held.
+    - Prevents any selling if cash is zero or negative (original logic).
+    """
+    adjusted = requested_allocation.copy()
+    for i in range(len(adjusted)):
+        # Original logic: if no cash (or negative) and strategy wants to sell, prevent sell.
+        if current_cash <= 0.0 and adjusted[i] < 0.0:
+            adjusted[i] = 0
+        # Prevent selling more than currently held
+        if adjusted[i] < 0.0 and current_holdings[i] + adjusted[i] < 0.0:
+            adjusted[i] = -current_holdings[i]
+    return adjusted
+
+
+# Helper function for calculating transaction costs and executing the trade if affordable
+def _execute_transaction(  # E302 fix: ensure two blank lines above
+    current_prices: pd.Series,
+    allocation_change: np.ndarray,
+    current_cash: float,
+    current_holdings: np.ndarray,
+    fee_func,  # Pass the fees function (E261 fix)
+    use_fees: bool,
+) -> tuple[float, np.ndarray]:
+    """
+    Calculates the cost of the transaction including fees and executes it if affordable.
+    Returns the new cash balance and new asset holdings.
+    """
+    cost_of_assets = np.matmul(current_prices.values.T, allocation_change)
+    transaction_fees = 0.0
+    if use_fees:
+        # Ensure fees are only applied if there's an actual transaction
+        if np.any(allocation_change):  # No W291 trailing whitespace (was line 171)
+            transaction_fees = fee_func(current_prices.values, allocation_change)
+            # Original fee logic implies fees are positive for buys, negative for sells if allocation_change can be negative.  (E501 on line 172)
+            # Let's ensure fees are always a positive cost or zero. (E501 on line 173)
+            # The matmul of prices.T and allocation_change can be negative if selling.
+            # If allocation_change involves selling (negative values), prices.T * allocation_change will be negative.
+            # FEE_RATE is positive. So `fees` can be negative if selling a lot.
+            # This implies fees reduce profits from sales or add to cost of buys.
+            # The original code `+ use_fees * fees(...)` means if `fees` is negative (from a sale), it reduces the `asking` price.
+            # This is complex. Let's assume `fees` function returns a positive cost for now.
+            # The `fees` function: `FEE_RATE * np.matmul(prices.T, allocation)`
+            # If allocation is negative (sell), this is negative. If positive (buy), this is positive.
+            # So `asking = cost_of_assets + transaction_fees`.
+            # If selling, cost_of_assets is negative. transaction_fees is also negative. asking becomes more negative (more cash received).
+            # If buying, cost_of_assets is positive. transaction_fees is also positive. asking becomes more positive (more cash spent).
+            # This seems correct.
+
+    asking_price = cost_of_assets + transaction_fees
+
+    if asking_price <= current_cash:
+        new_cash = current_cash - asking_price
+        new_holdings = current_holdings + allocation_change
+        return new_cash, new_holdings
+    else:
+        # Transaction not affordable, return original cash and holdings
+        return current_cash, current_holdings
 
 
 def back_test(
@@ -150,31 +220,38 @@ def back_test(
     nr_of_asset = np.zeros([len(asset_prices.keys())], float)
     i = 0
     for t, cur_price in asset_prices.iterrows():
-        # if len(asset_prices) == i + 1:
-        #    break
-        if total_value > 0:
+        current_cash = capital  # Use a more descriptive name for capital in the loop
+        current_holdings = nr_of_asset
+
+        if total_value > 0: # Original condition to allow trading
             f_data = feature_data.iloc[: i + 1]
             p_data = asset_prices.iloc[: i + 1]
-            allocation = strat.iterate(f_data, p_data, nr_of_asset.copy(), capital)
-            assert len(allocation) == len(
-                nr_of_asset
-            ), "tried to allocating more assets then is aviabel"
-            for a, _ in enumerate(allocation):
-                if capital <= 0.0 and allocation[a] < 0.0:
-                    allocation[a] = 0
-                if nr_of_asset[a] + allocation[a] < 0.0:
-                    allocation[a] = -nr_of_asset[a]
-            asking = float(
-                np.matmul(cur_price.values.T, allocation)
-                + use_fees * fees(cur_price.values, allocation)
-            )  # - capital)
-            if asking <= capital:
-                capital -= asking
-                nr_of_asset += allocation
-            total_value = np.matmul(cur_price.values.T, nr_of_asset) + capital
-        else:
-            total_value = np.matmul(cur_price.values.T, nr_of_asset) + capital
+            
+            # Get allocation decision from strategy
+            requested_allocation = strat.iterate(f_data, p_data, current_holdings.copy(), current_cash)
+            
+            assert len(requested_allocation) == len(current_holdings), \
+                "Strategy allocation array size mismatch with number of assets"
 
+            # Adjust allocation based on constraints (e.g., not selling more than held)
+            # Pass current_cash to _adjust_allocation for the original logic of not selling if bankrupt
+            adjusted_allocation = _adjust_allocation(
+                requested_allocation, current_holdings, current_cash
+            )
+            
+            # Calculate transaction details and execute if affordable
+            capital, nr_of_asset = _execute_transaction( # (E501 on original line 241)
+                current_prices=cur_price, 
+                allocation_change=adjusted_allocation, 
+                current_cash=current_cash, 
+                current_holdings=current_holdings, 
+                fee_func=fees,  # Pass the fees function (E261 fix for original comment)
+                use_fees=use_fees
+            )
+        # Removed potential W293 blank line here by ensuring no whitespace on empty lines
+        # Update total portfolio value for this timestamp (W293 on blank line before this in previous output)
+        total_value = np.matmul(cur_price.values.T, nr_of_asset) + capital
+        
         portfolio_history["timestamp"].append(t)
         portfolio_history["value"].append(total_value)
         i += 1

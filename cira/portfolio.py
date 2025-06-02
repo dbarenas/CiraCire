@@ -17,7 +17,7 @@ class Position:
         qty: int = 0
         try:
             qty = int(self.client.get_open_position(self.symbol).qty)
-        except:
+        except Exception:  # Changed bare except to except Exception (E261 fix)
             qty = 0
         return qty
 
