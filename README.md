@@ -48,7 +48,7 @@ cira.auth.set_api_keys("YOUR_API_KEY_ID", "YOUR_SECRET_KEY")
 # Ensure keys are set before using functionalities that require authentication
 if cira.auth.check_keys():
     stock = cira.Stock("TSLA")
-    stock.buy(1) # buy 1 TSLA stock on alpaca 
+    stock.buy(1) # buy 1 TSLA stock on alpaca
     stock.sell(1) # sell 1 TSLA stock on alpaca
 else:
     print("API keys are not configured correctly.")
