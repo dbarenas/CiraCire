@@ -226,10 +226,10 @@ def back_test(
         if total_value > 0: # Original condition to allow trading
             f_data = feature_data.iloc[: i + 1]
             p_data = asset_prices.iloc[: i + 1]
-            
+
             # Get allocation decision from strategy
             requested_allocation = strat.iterate(f_data, p_data, current_holdings.copy(), current_cash)
-            
+
             assert len(requested_allocation) == len(current_holdings), \
                 "Strategy allocation array size mismatch with number of assets"
 
@@ -238,20 +238,20 @@ def back_test(
             adjusted_allocation = _adjust_allocation(
                 requested_allocation, current_holdings, current_cash
             )
-            
+
             # Calculate transaction details and execute if affordable
             capital, nr_of_asset = _execute_transaction( # (E501 on original line 241)
-                current_prices=cur_price, 
-                allocation_change=adjusted_allocation, 
-                current_cash=current_cash, 
-                current_holdings=current_holdings, 
+                current_prices=cur_price,
+                allocation_change=adjusted_allocation,
+                current_cash=current_cash,
+                current_holdings=current_holdings,
                 fee_func=fees,  # Pass the fees function (E261 fix for original comment)
                 use_fees=use_fees
             )
         # Removed potential W293 blank line here by ensuring no whitespace on empty lines
         # Update total portfolio value for this timestamp (W293 on blank line before this in previous output)
         total_value = np.matmul(cur_price.values.T, nr_of_asset) + capital
-        
+
         portfolio_history["timestamp"].append(t)
         portfolio_history["value"].append(total_value)
         i += 1
